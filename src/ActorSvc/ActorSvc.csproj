@@ -100,7 +100,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ActorSvc.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="ActorEventSource.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PackageRoot\ServiceManifest.xml" />

@@ -13,40 +13,38 @@ using Microsoft.ServiceFabric.Services.Runtime;
 
 namespace Web
 {
-    /// <summary>
-    /// The FabricRuntime creates an instance of this class for each service type instance. 
-    /// </summary>
-    internal sealed class Web : StatelessService
-    {
-        public Web(StatelessServiceContext context)
-            : base(context)
-        { }
+	/// <summary>
+	/// The FabricRuntime creates an instance of this class for each service type instance. 
+	/// </summary>
+	internal sealed class Web : StatelessService
+	{
+		public Web(StatelessServiceContext context)
+			: base(context)
+		{ }
 
-        /// <summary>
-        /// Optional override to create listeners (like tcp, http) for this service instance.
-        /// </summary>
-        /// <returns>The collection of listeners.</returns>
-        protected override IEnumerable<ServiceInstanceListener> CreateServiceInstanceListeners()
-        {
-            return new ServiceInstanceListener[]
-            {
-                new ServiceInstanceListener(serviceContext =>
-                    new KestrelCommunicationListener(serviceContext, "ServiceEndpoint", (url, listener) =>
-                    {
-                        ServiceEventSource.Current.ServiceMessage(serviceContext, $"Starting Kestrel on {url}");
-
-                        return new WebHostBuilder()
-                                    .UseKestrel()
-                                    .ConfigureServices(
-                                        services => services
-                                            .AddSingleton<StatelessServiceContext>(serviceContext))
-                                    .UseContentRoot(Directory.GetCurrentDirectory())
-                                    .UseStartup<Startup>()
-                                    .UseServiceFabricIntegration(listener, ServiceFabricIntegrationOptions.None)
-                                    .UseUrls(url)
-                                    .Build();
-                    }))
-            };
-        }
-    }
+		/// <summary>
+		/// Optional override to create listeners (like tcp, http) for this service instance.
+		/// </summary>
+		/// <returns>The collection of listeners.</returns>
+		protected override IEnumerable<ServiceInstanceListener> CreateServiceInstanceListeners()
+		{
+			return new ServiceInstanceListener[]
+			{
+				new ServiceInstanceListener(serviceContext =>
+					new KestrelCommunicationListener(serviceContext, "ServiceEndpoint", (url, listener) =>
+					{
+						return new WebHostBuilder()
+							.UseKestrel()
+							.ConfigureServices(
+								services => services
+									.AddSingleton<StatelessServiceContext>(serviceContext))
+							.UseContentRoot(Directory.GetCurrentDirectory())
+							.UseStartup<Startup>()
+							.UseServiceFabricIntegration(listener, ServiceFabricIntegrationOptions.None)
+							.UseUrls(url)
+							.Build();
+					}))
+			};
+		}
+	}
 }
