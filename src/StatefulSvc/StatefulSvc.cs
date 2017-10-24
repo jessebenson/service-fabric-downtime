@@ -11,17 +11,49 @@ using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
 using Microsoft.ServiceFabric.Data;
+using Microsoft.ServiceFabric.Data.Collections;
 
 namespace StatefulSvc
 {
 	/// <summary>
 	/// The FabricRuntime creates an instance of this class for each service type instance. 
 	/// </summary>
-	internal sealed class StatefulSvc : StatefulService
+	internal sealed class StatefulSvc : StatefulService, IStatefulSvc
 	{
 		public StatefulSvc(StatefulServiceContext context)
 			: base(context)
 		{ }
+
+		public async Task<long> GetValueAsync(string key, CancellationToken token)
+		{
+			var state = await StateManager.GetOrAddAsync<IReliableDictionary<string, long>>("state").ConfigureAwait(false);
+
+			using (var tx = StateManager.CreateTransaction())
+			{
+				var result = await state.TryGetValueAsync(tx, key, TimeSpan.FromSeconds(4), token).ConfigureAwait(false);
+				await tx.CommitAsync().ConfigureAwait(false);
+
+				return result.Value;
+			}
+		}
+
+		public async Task SetValueAsync(string key, long value, CancellationToken token)
+		{
+			var state = await StateManager.GetOrAddAsync<IReliableDictionary<string, long>>("state").ConfigureAwait(false);
+
+			using (var tx = StateManager.CreateTransaction())
+			{
+				await state.SetAsync(tx, key, value, TimeSpan.FromSeconds(4), token).ConfigureAwait(false);
+				await tx.CommitAsync().ConfigureAwait(false);
+			}
+		}
+
+		protected override async Task RunAsync(CancellationToken cancellationToken)
+		{
+			var state = await StateManager.GetOrAddAsync<IReliableDictionary<string, long>>("state").ConfigureAwait(false);
+
+			await base.RunAsync(cancellationToken).ConfigureAwait(false);
+		}
 
 		/// <summary>
 		/// Optional override to create listeners (like tcp, http) for this service instance.

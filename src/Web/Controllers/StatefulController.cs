@@ -4,15 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
-namespace StatefulSvc.Controllers
+namespace Web.Controllers
 {
 	[Route("api/[controller]")]
-	public class ValuesController : Controller
+	public class StatefulController : Controller
 	{
-		public ValuesController()
-		{
 
-		}
 
 		// GET api/values
 		[HttpGet]

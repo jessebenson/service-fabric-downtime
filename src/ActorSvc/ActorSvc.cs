@@ -45,25 +45,14 @@ namespace ActorSvc
 			return this.StateManager.TryAddStateAsync("count", 0);
 		}
 
-		/// <summary>
-		/// TODO: Replace with your own actor method.
-		/// </summary>
-		/// <returns></returns>
-		Task<int> IActorSvc.GetCountAsync(CancellationToken cancellationToken)
+		Task<long> IActorSvc.GetValueAsync(string key, CancellationToken cancellationToken)
 		{
-			return this.StateManager.GetStateAsync<int>("count", cancellationToken);
+			return this.StateManager.GetStateAsync<long>(key, cancellationToken);
 		}
 
-		/// <summary>
-		/// TODO: Replace with your own actor method.
-		/// </summary>
-		/// <param name="count"></param>
-		/// <returns></returns>
-		Task IActorSvc.SetCountAsync(int count, CancellationToken cancellationToken)
+		Task IActorSvc.SetValueAsync(string key, long value, CancellationToken cancellationToken)
 		{
-			// Requests are not guaranteed to be processed in order nor at most once.
-			// The update function here verifies that the incoming count is greater than the current count to preserve order.
-			return this.StateManager.AddOrUpdateStateAsync("count", count, (key, value) => count > value ? count : value, cancellationToken);
+			return this.StateManager.SetStateAsync(key, value, cancellationToken);
 		}
 	}
 }
