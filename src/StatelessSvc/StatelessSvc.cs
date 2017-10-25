@@ -1,25 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Fabric;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using Common;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
-using Microsoft.ServiceFabric.Services.Runtime;
+using Serilog;
+using System;
+using System.Collections.Generic;
+using System.Fabric;
+using System.IO;
 
 namespace StatelessSvc
 {
 	/// <summary>
 	/// The FabricRuntime creates an instance of this class for each service type instance. 
 	/// </summary>
-	internal sealed class StatelessSvc : StatelessService
+	internal sealed class StatelessSvc : LoggingStatelessService
 	{
-		public StatelessSvc(StatelessServiceContext context)
-			: base(context)
+		public StatelessSvc(StatelessServiceContext context, ILogger logger)
+			: base(context, logger)
 		{ }
 
 		/// <summary>
@@ -37,7 +35,9 @@ namespace StatelessSvc
 							.UseKestrel()
 							.ConfigureServices(
 								services => services
-									.AddSingleton<StatelessServiceContext>(serviceContext))
+									.AddSingleton<ILogger>(_logger)
+									.AddSingleton<StatelessServiceContext>(serviceContext)
+							)
 							.UseContentRoot(Directory.GetCurrentDirectory())
 							.UseStartup<Startup>()
 							.UseServiceFabricIntegration(listener, ServiceFabricIntegrationOptions.None)

@@ -1,46 +1,57 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Common;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
+using System;
+using System.Diagnostics;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Web.Controllers
 {
 	[Route("api/[controller]")]
 	public class StatefulController : Controller
 	{
+		private static readonly HttpClient _reverseProxy = new HttpClient { BaseAddress = new Uri("http://localhost:19081/App/StatefulSvc/") };
 
+		private readonly ILogger _logger;
 
-		// GET api/values
-		[HttpGet]
-		public IEnumerable<string> Get()
+		public StatefulController(ILogger logger)
 		{
-			return new string[] { "value1", "value2" };
+			_logger = logger;
 		}
 
-		// GET api/values/5
-		[HttpGet("{id}")]
-		public string Get(int id)
+		// GET api/stateful/reverse-proxy
+		[HttpGet("reverse-proxy")]
+		public async Task<IActionResult> GetWithReverseProxy()
 		{
-			return "value";
-		}
+			var timer = Stopwatch.StartNew();
+			Guid correlationId = HttpContext.Request.GetCorrelationId();
+			try
+			{
+				var request = new HttpRequestMessage(HttpMethod.Get, "api/count")
+					.AddCorrelationId(correlationId);
 
-		// POST api/values
-		[HttpPost]
-		public void Post([FromBody]string value)
-		{
-		}
+				// Default timeout is 60 seconds.
+				var response = await _reverseProxy.SendAsync(request).ConfigureAwait(false);
+				if (!response.IsSuccessStatusCode)
+				{
+					_logger.Error("{MethodName} failed with {StatusCode} in {ElapsedTime} ms. {CorrelationId}", "api/stateful/reverse-proxy", timer.ElapsedMilliseconds, (int)response.StatusCode, correlationId);
+					return StatusCode((int)response.StatusCode);
+				}
 
-		// PUT api/values/5
-		[HttpPut("{id}")]
-		public void Put(int id, [FromBody]string value)
-		{
-		}
+				string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+				long value = long.Parse(content);
 
-		// DELETE api/values/5
-		[HttpDelete("{id}")]
-		public void Delete(int id)
-		{
+				_logger.Information("{MethodName} completed with {StatusCode} in {ElapsedTime} ms. {CorrelationId}", "api/stateful/reverse-proxy", timer.ElapsedMilliseconds, (int)HttpStatusCode.OK, correlationId);
+
+				return Ok(value);
+			}
+			catch (Exception e)
+			{
+				_logger.Error(e, "{MethodName} failed with {StatusCode} in {ElapsedTime} ms. {CorrelationId}", "api/stateful/reverse-proxy", timer.ElapsedMilliseconds, (int)HttpStatusCode.InternalServerError, correlationId);
+				return StatusCode((int)HttpStatusCode.InternalServerError, e.Message);
+			}
 		}
 	}
 }

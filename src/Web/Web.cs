@@ -1,30 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Fabric;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using Common;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
-using Microsoft.ServiceFabric.Services.Runtime;
+using Serilog;
+using System;
+using System.Collections.Generic;
+using System.Fabric;
+using System.IO;
 using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Web
 {
 	/// <summary>
 	/// The FabricRuntime creates an instance of this class for each service type instance. 
 	/// </summary>
-	internal sealed class Web : StatelessService, IWebService
+	internal sealed class Web : LoggingStatelessService, IWebService
 	{
-		private const bool HealthCheck = false;
+		private const bool HealthCheck = true;
 
 		private HttpStatusCode _health = HttpStatusCode.OK;
 
-		public Web(StatelessServiceContext context)
-			: base(context)
+		public Web(StatelessServiceContext context, ILogger logger)
+			: base(context, logger)
 		{ }
 
 		HttpStatusCode IWebService.GetHealth()
@@ -36,24 +36,29 @@ namespace Web
 		{
 			await base.RunAsync(cancellationToken).ConfigureAwait(false);
 
-			// Service is available to handle new requests.
-			_health = HttpStatusCode.OK;
-
-			var shutdownToken = new TaskCompletionSource<bool>();
-			cancellationToken.Register(() =>
+			if (HealthCheck)
 			{
-				// Service is unavailable to handle new requests.
-				_health = HttpStatusCode.ServiceUnavailable;
+				// Service is available to handle new requests.
+				_health = HttpStatusCode.OK;
 
-				// On shutdown, wait 30 seconds to give Load Balancer time to stop sending new requests.
-				Task.Delay(TimeSpan.FromSeconds(30)).ContinueWith(t =>
+				var shutdownToken = new TaskCompletionSource<bool>();
+				cancellationToken.Register(() =>
 				{
-					shutdownToken.SetResult(true);
-				});
-			});
+					// Service is unavailable to handle new requests.
+					_health = HttpStatusCode.ServiceUnavailable;
 
-			// Prevent front-end from closing until requests are drained.
-			await shutdownToken.Task.ConfigureAwait(false);
+					// On shutdown, wait 30 seconds to give Load Balancer time to stop sending new requests.
+					Task.Delay(TimeSpan.FromSeconds(30)).ContinueWith(t =>
+					{
+						shutdownToken.SetResult(true);
+					});
+				});
+
+				// Prevent front-end from closing until requests are drained.
+				await shutdownToken.Task.ConfigureAwait(false);
+
+				_logger.Information("Service Fabric API {ServiceFabricApi}.  Completed.", "RunAsync");
+			}
 		}
 
 		/// <summary>
@@ -71,6 +76,7 @@ namespace Web
 							.UseKestrel()
 							.ConfigureServices(
 								services => services
+									.AddSingleton<ILogger>(_logger)
 									.AddSingleton<StatelessServiceContext>(serviceContext)
 									.AddSingleton<IWebService>(this)
 							)

@@ -4,9 +4,8 @@ using System.Threading.Tasks;
 
 namespace StatefulSvc
 {
-	interface IStatefulSvc
+	public interface IStatefulSvc
 	{
-		Task<long> GetValueAsync(string key, CancellationToken token);
-		Task SetValueAsync(string key, long value, CancellationToken token);
+		Task<long> IncrementAsync(CancellationToken token);
 	}
 }

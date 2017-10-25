@@ -4,7 +4,6 @@
     <Parameter Name="ActorSvcActorService_PartitionCount" DefaultValue="1" />
     <Parameter Name="ActorSvcActorService_MinReplicaSetSize" DefaultValue="3" />
     <Parameter Name="ActorSvcActorService_TargetReplicaSetSize" DefaultValue="4" />
-    <Parameter Name="StatefulSvc_PartitionCount" DefaultValue="1" />
     <Parameter Name="StatefulSvc_MinReplicaSetSize" DefaultValue="3" />
     <Parameter Name="StatefulSvc_TargetReplicaSetSize" DefaultValue="4" />
     <Parameter Name="StatelessSvc_InstanceCount" DefaultValue="-1" />
@@ -41,7 +40,7 @@
     </Service>
     <Service Name="StatefulSvc" ServicePackageActivationMode="ExclusiveProcess">
       <StatefulService ServiceTypeName="StatefulSvcType" TargetReplicaSetSize="[StatefulSvc_TargetReplicaSetSize]" MinReplicaSetSize="[StatefulSvc_MinReplicaSetSize]">
-        <UniformInt64Partition PartitionCount="[StatefulSvc_PartitionCount]" LowKey="-9223372036854775808" HighKey="9223372036854775807" />
+        <SingletonPartition />
       </StatefulService>
     </Service>
     <Service Name="StatelessSvc" ServiceDnsName="stateless.app" ServicePackageActivationMode="ExclusiveProcess">

@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using ActorSvc.Interfaces;
+using Common;
 using Microsoft.ServiceFabric.Actors;
 using Microsoft.ServiceFabric.Actors.Runtime;
-using Microsoft.ServiceFabric.Actors.Client;
-using ActorSvc.Interfaces;
+using Serilog;
+using System;
+using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ActorSvc
 {
@@ -21,38 +21,47 @@ namespace ActorSvc
 	[StatePersistence(StatePersistence.Persisted)]
 	internal class ActorSvc : Actor, IActorSvc
 	{
+		private readonly ILogger _logger;
+
 		/// <summary>
 		/// Initializes a new instance of ActorSvc
 		/// </summary>
 		/// <param name="actorService">The Microsoft.ServiceFabric.Actors.Runtime.ActorService that will host this actor instance.</param>
 		/// <param name="actorId">The Microsoft.ServiceFabric.Actors.ActorId for this actor instance.</param>
-		public ActorSvc(ActorService actorService, ActorId actorId)
+		public ActorSvc(ActorService actorService, ActorId actorId, ILogger logger)
 			: base(actorService, actorId)
 		{
+			_logger = logger.WithServiceContext(actorService.Context);
 		}
 
-		/// <summary>
-		/// This method is called whenever an actor is activated.
-		/// An actor is activated the first time any of its methods are invoked.
-		/// </summary>
 		protected override Task OnActivateAsync()
 		{
-			// The StateManager is this actor's private state store.
-			// Data stored in the StateManager will be replicated for high-availability for actors that use volatile or persisted state storage.
-			// Any serializable object can be saved in the StateManager.
-			// For more information, see https://aka.ms/servicefabricactorsstateserialization
-
-			return this.StateManager.TryAddStateAsync("count", 0);
+			_logger.Information("Service Fabric API {ServiceFabricApi}.  Actor id: {ActorId}.", "OnActivateAsync", this.Id);
+			return base.OnActivateAsync();
 		}
 
-		Task<long> IActorSvc.GetValueAsync(string key, CancellationToken cancellationToken)
+		protected override Task OnDeactivateAsync()
 		{
-			return this.StateManager.GetStateAsync<long>(key, cancellationToken);
+			_logger.Information("Service Fabric API {ServiceFabricApi}.  Actor id: {ActorId}.", "OnDeactivateAsync", this.Id);
+			return base.OnDeactivateAsync();
 		}
 
-		Task IActorSvc.SetValueAsync(string key, long value, CancellationToken cancellationToken)
+		async Task<long> IActorSvc.CountAsync(Guid correlationId, CancellationToken cancellationToken)
 		{
-			return this.StateManager.SetStateAsync(key, value, cancellationToken);
+			var timer = Stopwatch.StartNew();
+			try
+			{
+				long value = await this.StateManager.AddOrUpdateStateAsync<long>("count", 0, (k, v) => v + 1, cancellationToken).ConfigureAwait(false);
+
+				_logger.Information("{MethodName} completed in {ElapsedTime} ms. {CorrelationId}", "ActorSvc.Count", timer.ElapsedMilliseconds, correlationId);
+
+				return value;
+			}
+			catch (Exception e)
+			{
+				_logger.Error(e, "{MethodName} failed in {ElapsedTime} ms. {CorrelationId}", "ActorSvc.Count", timer.ElapsedMilliseconds, correlationId);
+				throw;
+			}
 		}
 	}
 }

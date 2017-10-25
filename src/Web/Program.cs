@@ -1,8 +1,9 @@
-﻿using Microsoft.ServiceFabric.Services.Runtime;
+﻿using Common;
+using Microsoft.ServiceFabric.Services.Runtime;
+using Serilog;
 using System;
-using System.Diagnostics;
+using System.Fabric;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Web
 {
@@ -13,16 +14,22 @@ namespace Web
 		/// </summary>
 		private static void Main()
 		{
-			// The ServiceManifest.XML file defines one or more service type names.
-			// Registering a service maps a service type name to a .NET type.
-			// When Service Fabric creates an instance of this service type,
-			// an instance of the class is created in this host process.
+			try
+			{
+				var logger = LogConfig.CreateLogger(FabricRuntime.GetNodeContext(), FabricRuntime.GetActivationContext());
 
-			ServiceRuntime.RegisterServiceAsync("WebType",
-				context => new Web(context)).GetAwaiter().GetResult();
+				ServiceRuntime.RegisterServiceAsync("WebType",
+					context => new Web(context, logger)).GetAwaiter().GetResult();
 
-			// Prevents this host process from terminating so services keeps running. 
-			Thread.Sleep(Timeout.Infinite);
+				Log.Information("Service host process registered service type {ServiceTypeName}.", "WebType");
+
+				Thread.Sleep(Timeout.Infinite);
+			}
+			catch (Exception e)
+			{
+				Log.Error(e, "Service host process initialization failed for service type {ServiceTypeName}.", "WebType");
+				throw;
+			}
 		}
 	}
 }

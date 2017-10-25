@@ -11,7 +11,6 @@ namespace ActorSvc.Interfaces
 	/// </summary>
 	public interface IActorSvc : IActor
 	{
-		Task<long> GetValueAsync(string key, CancellationToken token);
-		Task SetValueAsync(string key, long value, CancellationToken token);
+		Task<long> CountAsync(Guid correlationId, CancellationToken token);
 	}
 }

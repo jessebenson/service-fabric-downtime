@@ -1,58 +1,40 @@
-﻿using System;
+﻿using Common;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.ServiceFabric.Data;
+using Microsoft.ServiceFabric.Data.Collections;
+using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
+using Microsoft.ServiceFabric.Services.Communication.Runtime;
+using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Fabric;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
-using Microsoft.ServiceFabric.Services.Communication.Runtime;
-using Microsoft.ServiceFabric.Services.Runtime;
-using Microsoft.ServiceFabric.Data;
-using Microsoft.ServiceFabric.Data.Collections;
 
 namespace StatefulSvc
 {
 	/// <summary>
 	/// The FabricRuntime creates an instance of this class for each service type instance. 
 	/// </summary>
-	internal sealed class StatefulSvc : StatefulService, IStatefulSvc
+	internal sealed class StatefulSvc : LoggingStatefulService, IStatefulSvc
 	{
-		public StatefulSvc(StatefulServiceContext context)
-			: base(context)
+		public StatefulSvc(StatefulServiceContext context, ILogger logger)
+			: base(context, logger)
 		{ }
 
-		public async Task<long> GetValueAsync(string key, CancellationToken token)
+		public async Task<long> IncrementAsync(CancellationToken token)
 		{
 			var state = await StateManager.GetOrAddAsync<IReliableDictionary<string, long>>("state").ConfigureAwait(false);
 
 			using (var tx = StateManager.CreateTransaction())
 			{
-				var result = await state.TryGetValueAsync(tx, key, TimeSpan.FromSeconds(4), token).ConfigureAwait(false);
+				long result = await state.AddOrUpdateAsync(tx, "count", 0, (k, v) => v + 1, TimeSpan.FromSeconds(4), token).ConfigureAwait(false);
 				await tx.CommitAsync().ConfigureAwait(false);
 
-				return result.Value;
+				return result;
 			}
-		}
-
-		public async Task SetValueAsync(string key, long value, CancellationToken token)
-		{
-			var state = await StateManager.GetOrAddAsync<IReliableDictionary<string, long>>("state").ConfigureAwait(false);
-
-			using (var tx = StateManager.CreateTransaction())
-			{
-				await state.SetAsync(tx, key, value, TimeSpan.FromSeconds(4), token).ConfigureAwait(false);
-				await tx.CommitAsync().ConfigureAwait(false);
-			}
-		}
-
-		protected override async Task RunAsync(CancellationToken cancellationToken)
-		{
-			var state = await StateManager.GetOrAddAsync<IReliableDictionary<string, long>>("state").ConfigureAwait(false);
-
-			await base.RunAsync(cancellationToken).ConfigureAwait(false);
 		}
 
 		/// <summary>
@@ -70,8 +52,11 @@ namespace StatefulSvc
 							.UseKestrel()
 							.ConfigureServices(
 								services => services
+									.AddSingleton<ILogger>(_logger)
+									.AddSingleton<IReliableStateManager>(this.StateManager)
 									.AddSingleton<StatefulServiceContext>(serviceContext)
-									.AddSingleton<IReliableStateManager>(this.StateManager))
+									.AddSingleton<IStatefulSvc>(this)
+							)
 							.UseContentRoot(Directory.GetCurrentDirectory())
 							.UseStartup<Startup>()
 							.UseServiceFabricIntegration(listener, ServiceFabricIntegrationOptions.UseUniqueServiceUrl)
