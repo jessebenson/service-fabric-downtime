@@ -36,20 +36,20 @@ namespace Web.Controllers
 				var response = await _reverseProxy.SendAsync(request).ConfigureAwait(false);
 				if (!response.IsSuccessStatusCode)
 				{
-					_logger.Error("{MethodName} failed with {StatusCode} in {ElapsedTime} ms. {CorrelationId}", "api/stateful/reverse-proxy", timer.ElapsedMilliseconds, (int)response.StatusCode, correlationId);
+					_logger.Error("{MethodName} failed with {StatusCode} in {ElapsedTime} ms. {CorrelationId}", "api/stateful/reverse-proxy", (int)response.StatusCode, timer.ElapsedMilliseconds, correlationId);
 					return StatusCode((int)response.StatusCode);
 				}
 
 				string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 				long value = long.Parse(content);
 
-				_logger.Information("{MethodName} completed with {StatusCode} in {ElapsedTime} ms. {CorrelationId}", "api/stateful/reverse-proxy", timer.ElapsedMilliseconds, (int)HttpStatusCode.OK, correlationId);
+				_logger.Information("{MethodName} completed with {StatusCode} in {ElapsedTime} ms. {CorrelationId}", "api/stateful/reverse-proxy", (int)HttpStatusCode.OK, timer.ElapsedMilliseconds, correlationId);
 
 				return Ok(value);
 			}
 			catch (Exception e)
 			{
-				_logger.Error(e, "{MethodName} failed with {StatusCode} in {ElapsedTime} ms. {CorrelationId}", "api/stateful/reverse-proxy", timer.ElapsedMilliseconds, (int)HttpStatusCode.InternalServerError, correlationId);
+				_logger.Error(e, "{MethodName} failed with {StatusCode} in {ElapsedTime} ms. {CorrelationId}", "api/stateful/reverse-proxy", (int)HttpStatusCode.InternalServerError, timer.ElapsedMilliseconds, correlationId);
 				return StatusCode((int)HttpStatusCode.InternalServerError, e.Message);
 			}
 		}
