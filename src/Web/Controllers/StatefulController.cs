@@ -26,7 +26,7 @@ namespace Web.Controllers
 		public async Task<IActionResult> GetWithReverseProxy()
 		{
 			var timer = Stopwatch.StartNew();
-			Guid correlationId = HttpContext.Request.GetCorrelationId();
+			var correlationId = HttpContext.Request.GetCorrelationId();
 			try
 			{
 				var request = new HttpRequestMessage(HttpMethod.Get, "api/count")

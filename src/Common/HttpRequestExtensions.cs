@@ -7,18 +7,16 @@ namespace Common
 {
 	public static class HttpRequestExtensions
 	{
-		public static Guid GetCorrelationId(this HttpRequest request)
+		public static string GetCorrelationId(this HttpRequest request)
 		{
-			Guid correlationId = Guid.Empty;
 			if (request.Headers.TryGetValue("correlation-id", out StringValues header))
-				correlationId = Guid.Parse(header);
-
-			return correlationId;
+				return header.ToString();
+			return Guid.Empty.ToString();
 		}
 
-		public static HttpRequestMessage AddCorrelationId(this HttpRequestMessage request, Guid correlationId)
+		public static HttpRequestMessage AddCorrelationId(this HttpRequestMessage request, string correlationId)
 		{
-			request.Headers.Add("correlation-id", correlationId.ToString());
+			request.Headers.Add("correlation-id", correlationId);
 			return request;
 		}
 	}

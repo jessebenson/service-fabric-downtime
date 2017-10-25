@@ -19,7 +19,7 @@ namespace StatelessSvc.Controllers
 		[HttpGet]
 		public IActionResult Count()
 		{
-			Guid correlationId = HttpContext.Request.GetCorrelationId();
+			var correlationId = HttpContext.Request.GetCorrelationId();
 			_logger.Information("{MethodName} completed in {ElapsedTime} ms. {CorrelationId}", "StatelessSvc.Count", 0, correlationId);
 			return Ok(17);
 		}

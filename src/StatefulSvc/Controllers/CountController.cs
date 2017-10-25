@@ -26,7 +26,7 @@ namespace StatefulSvc.Controllers
 		public async Task<IActionResult> Count(CancellationToken token)
 		{
 			var timer = Stopwatch.StartNew();
-			Guid correlationId = HttpContext.Request.GetCorrelationId();
+			var correlationId = HttpContext.Request.GetCorrelationId();
 			try
 			{
 				long value = await _statefulSvc.IncrementAsync(token).ConfigureAwait(false);

@@ -13,11 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StatelessSvc", "StatelessSv
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StatefulSvc", "StatefulSvc\StatefulSvc.csproj", "{CF9E9689-BBD5-4F0E-B59E-2BFC0D0C6D1C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ActorSvc", "ActorSvc\ActorSvc.csproj", "{C741D419-D68A-4501-905B-8800946D3328}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ActorSvc.Interfaces", "ActorSvc.Interfaces\ActorSvc.Interfaces.csproj", "{434067E4-1776-4217-8220-97FD912F543A}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{79A1DED8-D304-4BFE-AF5A-6BC81580C4AF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{79A1DED8-D304-4BFE-AF5A-6BC81580C4AF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -67,18 +63,6 @@ Global
 		{CF9E9689-BBD5-4F0E-B59E-2BFC0D0C6D1C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CF9E9689-BBD5-4F0E-B59E-2BFC0D0C6D1C}.Release|x64.ActiveCfg = Release|Any CPU
 		{CF9E9689-BBD5-4F0E-B59E-2BFC0D0C6D1C}.Release|x64.Build.0 = Release|Any CPU
-		{C741D419-D68A-4501-905B-8800946D3328}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{C741D419-D68A-4501-905B-8800946D3328}.Debug|x64.ActiveCfg = Debug|x64
-		{C741D419-D68A-4501-905B-8800946D3328}.Debug|x64.Build.0 = Debug|x64
-		{C741D419-D68A-4501-905B-8800946D3328}.Release|Any CPU.ActiveCfg = Release|x64
-		{C741D419-D68A-4501-905B-8800946D3328}.Release|x64.ActiveCfg = Release|x64
-		{C741D419-D68A-4501-905B-8800946D3328}.Release|x64.Build.0 = Release|x64
-		{434067E4-1776-4217-8220-97FD912F543A}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{434067E4-1776-4217-8220-97FD912F543A}.Debug|x64.ActiveCfg = Debug|x64
-		{434067E4-1776-4217-8220-97FD912F543A}.Debug|x64.Build.0 = Debug|x64
-		{434067E4-1776-4217-8220-97FD912F543A}.Release|Any CPU.ActiveCfg = Release|x64
-		{434067E4-1776-4217-8220-97FD912F543A}.Release|x64.ActiveCfg = Release|x64
-		{434067E4-1776-4217-8220-97FD912F543A}.Release|x64.Build.0 = Release|x64
 		{79A1DED8-D304-4BFE-AF5A-6BC81580C4AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{79A1DED8-D304-4BFE-AF5A-6BC81580C4AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{79A1DED8-D304-4BFE-AF5A-6BC81580C4AF}.Debug|x64.ActiveCfg = Debug|Any CPU
