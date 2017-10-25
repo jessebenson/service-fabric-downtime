@@ -1,44 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Http;
 
 namespace Web.Controllers
 {
 	[Route("api/[controller]")]
 	public class StatelessController : Controller
 	{
-		// GET api/values
-		[HttpGet]
-		public IEnumerable<string> Get()
-		{
-			return new string[] { "value1", "value2" };
-		}
+		private static readonly HttpClient _statelessSvc = new HttpClient { BaseAddress = new Uri("http://stateless.app:8546") };
 
-		// GET api/values/5
-		[HttpGet("{id}")]
-		public string Get(int id)
+		// GET api/stateless/dns
+		[HttpGet("dns")]
+		public async Task<IActionResult> Get()
 		{
-			return "value";
-		}
+			var response = await _statelessSvc.GetAsync($"api/value").ConfigureAwait(false);
+			if (!response.IsSuccessStatusCode)
+				return StatusCode((int)response.StatusCode);
 
-		// POST api/values
-		[HttpPost]
-		public void Post([FromBody]string value)
-		{
-		}
-
-		// PUT api/values/5
-		[HttpPut("{id}")]
-		public void Put(int id, [FromBody]string value)
-		{
-		}
-
-		// DELETE api/values/5
-		[HttpDelete("{id}")]
-		public void Delete(int id)
-		{
+			string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+			return Ok(long.Parse(content));
 		}
 	}
 }
