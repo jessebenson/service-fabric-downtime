@@ -30,7 +30,7 @@ namespace Web.Controllers
 			var correlationId = HttpContext.Request.GetCorrelationId();
 			try
 			{
-				var request = new HttpRequestMessage(HttpMethod.Get, "api/count")
+				var request = new HttpRequestMessage(HttpMethod.Get, "api/count/dns")
 					.AddCorrelationId(correlationId);
 
 				var response = await _statelessSvc.SendAsync(request).ConfigureAwait(false);
@@ -62,7 +62,7 @@ namespace Web.Controllers
 			var correlationId = HttpContext.Request.GetCorrelationId();
 			try
 			{
-				var request = new HttpRequestMessage(HttpMethod.Get, "api/count")
+				var request = new HttpRequestMessage(HttpMethod.Get, "api/count/reverse-proxy")
 					.AddCorrelationId(correlationId);
 
 				// Default timeout is 60 seconds.

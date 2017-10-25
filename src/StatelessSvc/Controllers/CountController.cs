@@ -15,12 +15,21 @@ namespace StatelessSvc.Controllers
 			_logger = logger;
 		}
 
-		// GET api/count
-		[HttpGet]
-		public IActionResult Count()
+		// GET api/count/dns
+		[HttpGet("dns")]
+		public IActionResult CountWithDns()
 		{
 			var correlationId = HttpContext.Request.GetCorrelationId();
-			_logger.Information("{MethodName} completed in {ElapsedTime} ms. {CorrelationId}", "StatelessSvc.Count", 0, correlationId);
+			_logger.Information("{MethodName} completed in {ElapsedTime} ms. {CorrelationId}", "api/count/dns", 0, correlationId);
+			return Ok(17);
+		}
+
+		// GET api/count/reverse-proxy
+		[HttpGet("reverse-proxy")]
+		public IActionResult CountWithReverseProxy()
+		{
+			var correlationId = HttpContext.Request.GetCorrelationId();
+			_logger.Information("{MethodName} completed in {ElapsedTime} ms. {CorrelationId}", "api/count/reverse-proxy", 0, correlationId);
 			return Ok(17);
 		}
 	}

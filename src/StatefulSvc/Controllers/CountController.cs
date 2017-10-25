@@ -21,8 +21,8 @@ namespace StatefulSvc.Controllers
 			_logger = logger;
 		}
 
-		// GET api/count
-		[HttpGet]
+		// GET api/count/reverse-proxy
+		[HttpGet("reverse-proxy")]
 		public async Task<IActionResult> Count(CancellationToken token)
 		{
 			var timer = Stopwatch.StartNew();
@@ -31,13 +31,13 @@ namespace StatefulSvc.Controllers
 			{
 				long value = await _statefulSvc.IncrementAsync(token).ConfigureAwait(false);
 
-				_logger.Information("{MethodName} completed in {ElapsedTime} ms. {CorrelationId}", "StatefulSvc.Count", timer.ElapsedMilliseconds, correlationId);
+				_logger.Information("{MethodName} completed in {ElapsedTime} ms. {CorrelationId}", "api/count/reverse-proxy", timer.ElapsedMilliseconds, correlationId);
 
 				return Ok(value);
 			}
 			catch (Exception e)
 			{
-				_logger.Error(e, "{MethodName} failed in {ElapsedTime} ms. {CorrelationId}", "StatefulSvc.Count", timer.ElapsedMilliseconds, correlationId);
+				_logger.Error(e, "{MethodName} failed in {ElapsedTime} ms. {CorrelationId}", "api/count/reverse-proxy", timer.ElapsedMilliseconds, correlationId);
 				return StatusCode((int)HttpStatusCode.InternalServerError, e.Message);
 			}
 		}
