@@ -1,4 +1,5 @@
 ﻿using Common;
+using Serilog.Core.Enrichers;
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -12,9 +13,11 @@ namespace Client
 		static async Task MainAsync(string[] args)
 		{
 			int taskCount = args.Length > 0 ? int.Parse(args[0]) : 3;
+			string clientName = args.Length > 1 ? args[1] : "Client";
 
 			// Create Elasticsearch logger.
-			var logger = LogConfig.CreateLogger();
+			var logger = LogConfig.CreateLogger()
+				.ForContext(new PropertyEnricher("ClientName", clientName));
 
 			// HttpClient to service.
 			var client = new HttpClient { BaseAddress = new Uri("http://service-fabric.eastus.cloudapp.azure.com") };
