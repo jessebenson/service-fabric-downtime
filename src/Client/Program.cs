@@ -30,29 +30,32 @@ namespace Client
 				{
 					await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
 
-					var timer = Stopwatch.StartNew();
-					var correlationId = Guid.NewGuid().ToString();
-					try
+					var task = Task.Run(async () =>
 					{
-						// GET from service.
-						var request = new HttpRequestMessage(HttpMethod.Get, endpoint)
-							.AddCorrelationId(correlationId);
-
-						var response = await client.SendAsync(request).ConfigureAwait(false);
-
-						if (response.IsSuccessStatusCode)
+						var timer = Stopwatch.StartNew();
+						var correlationId = Guid.NewGuid().ToString();
+						try
 						{
-							logger.Information("{MethodName} completed with {StatusCode} in {ElapsedTime} ms. {CorrelationId}", endpoint, (int)response.StatusCode, timer.ElapsedMilliseconds, correlationId);
+							// GET from service.
+							var request = new HttpRequestMessage(HttpMethod.Get, endpoint)
+								.AddCorrelationId(correlationId);
+
+							var response = await client.SendAsync(request).ConfigureAwait(false);
+
+							if (response.IsSuccessStatusCode)
+							{
+								logger.Information("{MethodName} completed with {StatusCode} in {ElapsedTime} ms. {CorrelationId}", endpoint, (int)response.StatusCode, timer.ElapsedMilliseconds, correlationId);
+							}
+							else
+							{
+								logger.Error("{MethodName} failed with {StatusCode} in {ElapsedTime} ms. {CorrelationId}", endpoint, (int)response.StatusCode, timer.ElapsedMilliseconds, correlationId);
+							}
 						}
-						else
+						catch (Exception e)
 						{
-							logger.Error("{MethodName} failed with {StatusCode} in {ElapsedTime} ms. {CorrelationId}", endpoint, (int)response.StatusCode, timer.ElapsedMilliseconds, correlationId);
+							logger.Error(e, "{MethodName} failed in {ElapsedTime} ms. {CorrelationId}", endpoint, timer.ElapsedMilliseconds, correlationId);
 						}
-					}
-					catch (Exception e)
-					{
-						logger.Error(e, "{MethodName} failed in {ElapsedTime} ms. {CorrelationId}", endpoint, timer.ElapsedMilliseconds, correlationId);
-					}
+					});
 				}
 			}));
 

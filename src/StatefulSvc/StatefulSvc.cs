@@ -20,6 +20,9 @@ namespace StatefulSvc
 	/// </summary>
 	internal sealed class StatefulSvc : LoggingStatefulService, IStatefulSvc
 	{
+		private const long KeyCount = 1024*1024;
+		private long _key = 0;
+
 		public StatefulSvc(StatefulServiceContext context, ILogger logger)
 			: base(context, logger)
 		{ }
@@ -30,7 +33,8 @@ namespace StatefulSvc
 
 			using (var tx = StateManager.CreateTransaction())
 			{
-				long result = await state.AddOrUpdateAsync(tx, "count", 0, (k, v) => v + 1, TimeSpan.FromSeconds(4), token).ConfigureAwait(false);
+				long key = Interlocked.Increment(ref _key) % KeyCount;
+				long result = await state.AddOrUpdateAsync(tx, $"count-{key}", 0, (k, v) => v + 1, TimeSpan.FromSeconds(4), token).ConfigureAwait(false);
 				await tx.CommitAsync().ConfigureAwait(false);
 
 				return result;
