@@ -28,7 +28,7 @@ namespace Client
 				string endpoint = GetEndpoint(i);
 				while (true)
 				{
-					await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
+					await Task.Delay(TimeSpan.FromMilliseconds(50)).ConfigureAwait(false);
 
 					var task = Task.Run(async () =>
 					{

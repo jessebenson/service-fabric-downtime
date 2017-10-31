@@ -50,6 +50,7 @@ namespace Common
 		{
 			return new ElasticsearchSinkOptions(AppConfig.ElasticsearchUri)
 			{
+				BatchPostingLimit = 1000,
 				ModifyConnectionSettings = settings => settings.BasicAuthentication(AppConfig.ElasticsearchUsername, AppConfig.ElasticsearchPassword),
 			};
 		}
