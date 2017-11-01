@@ -19,7 +19,7 @@ namespace Web
 	/// </summary>
 	internal sealed class Web : LoggingStatelessService, IWebService
 	{
-		private const bool HealthCheck = true;
+		private const bool HealthCheck = false;
 
 		private HttpStatusCode _health = HttpStatusCode.OK;
 
