@@ -18,12 +18,22 @@ namespace StatelessSvc
 		{
 			try
 			{
-				var logger = LogConfig.CreateLogger(FabricRuntime.GetNodeContext(), FabricRuntime.GetActivationContext());
+				var timer = Stopwatch.StartNew();
+				var nodeContext = FabricRuntime.GetNodeContext();
+				long nodeContextTime = timer.ElapsedMilliseconds;
+
+				timer.Restart();
+				var activationContext = FabricRuntime.GetActivationContext();
+				long activationContextTime = timer.ElapsedMilliseconds;
+
+				timer.Restart();
+				var logger = LogConfig.CreateLogger(nodeContext, activationContext);
+				long createLoggerTime = timer.ElapsedMilliseconds;
 
 				ServiceRuntime.RegisterServiceAsync("StatelessSvcType",
 					context => new StatelessSvc(context, logger)).GetAwaiter().GetResult();
 
-				Log.Information("Service host process registered service type {ServiceTypeName}.", "StatelessSvcType");
+				Log.Information("Service host process registered service type {ServiceTypeName}. GetNodeContext: {GetNodeContextTimeInMs} ms. GetActivationContext: {GetActivationContextTimeInMs} ms. CreateLogger: {CreateLoggerTimeInMs} ms.", "StatelessSvcType", nodeContextTime, activationContextTime, createLoggerTime);
 
 				// Prevents this host process from terminating so services keeps running. 
 				Thread.Sleep(Timeout.Infinite);

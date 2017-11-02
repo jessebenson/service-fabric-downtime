@@ -2,6 +2,7 @@
 using Microsoft.ServiceFabric.Services.Runtime;
 using Serilog;
 using System;
+using System.Diagnostics;
 using System.Fabric;
 using System.Threading;
 
@@ -16,12 +17,22 @@ namespace Web
 		{
 			try
 			{
-				var logger = LogConfig.CreateLogger(FabricRuntime.GetNodeContext(), FabricRuntime.GetActivationContext());
+				var timer = Stopwatch.StartNew();
+				var nodeContext = FabricRuntime.GetNodeContext();
+				long nodeContextTime = timer.ElapsedMilliseconds;
+
+				timer.Restart();
+				var activationContext = FabricRuntime.GetActivationContext();
+				long activationContextTime = timer.ElapsedMilliseconds;
+
+				timer.Restart();
+				var logger = LogConfig.CreateLogger(nodeContext, activationContext);
+				long createLoggerTime = timer.ElapsedMilliseconds;
 
 				ServiceRuntime.RegisterServiceAsync("WebType",
 					context => new Web(context, logger)).GetAwaiter().GetResult();
 
-				Log.Information("Service host process registered service type {ServiceTypeName}.", "WebType");
+				Log.Information("Service host process registered service type {ServiceTypeName}. GetNodeContext: {GetNodeContextTimeInMs} ms. GetActivationContext: {GetActivationContextTimeInMs} ms. CreateLogger: {CreateLoggerTimeInMs} ms.", "WebType", nodeContextTime, activationContextTime, createLoggerTime);
 
 				Thread.Sleep(Timeout.Infinite);
 			}
