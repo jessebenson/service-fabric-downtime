@@ -20,7 +20,7 @@ namespace Web
 				var timer = Stopwatch.StartNew();
 				var nodeContext = FabricRuntime.GetNodeContext();
 				long nodeContextTime = timer.ElapsedMilliseconds;
-
+				
 				timer.Restart();
 				var activationContext = FabricRuntime.GetActivationContext();
 				long activationContextTime = timer.ElapsedMilliseconds;
@@ -32,8 +32,10 @@ namespace Web
 				ServiceRuntime.RegisterServiceAsync("WebType",
 					context => new Web(context, logger)).GetAwaiter().GetResult();
 
-				Log.Information("Service host process registered service type {ServiceTypeName}. GetNodeContext: {GetNodeContextTimeInMs} ms. GetActivationContext: {GetActivationContextTimeInMs} ms. CreateLogger: {CreateLoggerTimeInMs} ms.", "WebType", nodeContextTime, activationContextTime, createLoggerTime);
+				Log.Information("Service host process registered service type {ServiceTypeName}. GetNodeContext: {GetNodeContextTimeInMs} ms. GetActivationContext: {GetActivationContextTimeInMs} ms. CreateLogger: {CreateLoggerTimeInMs} ms.",
+					"WebType", nodeContextTime, activationContextTime, createLoggerTime);
 
+				// Prevents this host process from terminating so services keeps running.
 				Thread.Sleep(Timeout.Infinite);
 			}
 			catch (Exception e)

@@ -5,7 +5,6 @@ using System;
 using System.Diagnostics;
 using System.Fabric;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace StatefulSvc
 {
@@ -33,9 +32,10 @@ namespace StatefulSvc
 				ServiceRuntime.RegisterServiceAsync("StatefulSvcType",
 					context => new StatefulSvc(context, logger)).GetAwaiter().GetResult();
 
-				Log.Information("Service host process registered service type {ServiceTypeName}. GetNodeContext: {GetNodeContextTimeInMs} ms. GetActivationContext: {GetActivationContextTimeInMs} ms. CreateLogger: {CreateLoggerTimeInMs} ms.", "StatefulSvcType", nodeContextTime, activationContextTime, createLoggerTime);
+				Log.Information("Service host process registered service type {ServiceTypeName}. GetNodeContext: {GetNodeContextTimeInMs} ms. GetActivationContext: {GetActivationContextTimeInMs} ms. CreateLogger: {CreateLoggerTimeInMs} ms.",
+					"StatefulSvcType", nodeContextTime, activationContextTime, createLoggerTime);
 
-				// Prevents this host process from terminating so services keeps running. 
+				// Prevents this host process from terminating so services keeps running.
 				Thread.Sleep(Timeout.Infinite);
 			}
 			catch (Exception e)
