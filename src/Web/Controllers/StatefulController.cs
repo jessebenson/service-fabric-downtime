@@ -29,7 +29,7 @@ namespace Web.Controllers
 			var correlationId = HttpContext.Request.GetCorrelationId();
 			try
 			{
-				var request = new HttpRequestMessage(HttpMethod.Get, "api/count/reverse-proxy")
+				var request = new HttpRequestMessage(HttpMethod.Get, "api/count/reverse-proxy?PartitionKind=Int64Range&PartitionKey=0")
 					.AddCorrelationId(correlationId);
 
 				// Default timeout is 60 seconds.
