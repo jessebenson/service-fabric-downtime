@@ -29,6 +29,7 @@
     <None Include="Scripts\Deploy-FabricApplication.ps1" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\MassiveSvc\MassiveSvc.csproj" />
     <ProjectReference Include="..\StatefulSvc\StatefulSvc.csproj" />
     <ProjectReference Include="..\StatelessSvc\StatelessSvc.csproj" />
     <ProjectReference Include="..\Web\Web.csproj" />
