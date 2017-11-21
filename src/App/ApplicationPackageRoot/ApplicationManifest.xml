@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ApplicationManifest xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ApplicationTypeName="AppType" ApplicationTypeVersion="1.0.0" xmlns="http://schemas.microsoft.com/2011/01/fabric">
   <Parameters>
-    <Parameter Name="MassiveSvc_PartitionCount" DefaultValue="1000" />
+    <Parameter Name="MassiveSvc_PartitionCount" DefaultValue="500" />
     <Parameter Name="MassiveSvc_MinReplicaSetSize" DefaultValue="3" />
     <Parameter Name="MassiveSvc_TargetReplicaSetSize" DefaultValue="4" />
     <Parameter Name="StatefulSvc_PartitionCount" DefaultValue="10" />
